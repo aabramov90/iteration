@@ -14,6 +14,8 @@ library(tidyverse)
 library(readxl)
 library(readr)
 library(patchwork)
+library(rvest)
+
 
 knitr::opts_chunk$set(
   fig.width = 6,
@@ -34,4 +36,120 @@ scale_colour_discrete = scale_color_viridis_d
 scale_fill_discrete = scale_fill_viridis_d
 ```
 
-# Loading the data
+# Simple
+
+## Z-scores
+
+(Sample - mean) / sd
+
+```{r}
+x_vec = rnorm(30, mean = 5, sd = 3)
+mean(x_vec)
+sd(x_vec)
+(x_vec - mean(x_vec)) / sd(x_vec)
+```
+
+I want to write a function for Z-scores
+
+```{r}
+z_scores = function(x){
+  
+  z = (x - mean(x)) / sd(x)
+  
+  return(z)
+}
+```
+
+```{r}
+z_scores(x_vec)
+```
+
+Try my function on some other things.
+
+```{r}
+z_scores(3)
+```
+
+Ok, updating the function.
+
+```{r}
+z_scores = function(x){
+  
+  if(!is.numeric(x)){
+    stop("Input must be numeric")
+  }
+  
+  if(length(x) < 3){
+    stop("Input must be at least 3")
+  }
+  
+  z = (x - mean(x)) / sd(x)
+  
+  return(z)
+}
+```
+
+```{r, eval = FALSE}
+z_scores("my name is Jeff")
+```
+
+Multiple outputs
+
+```{r}
+z_scores = function(x){
+  
+  if(!is.numeric(x)){
+    stop("Input must be numeric")
+  }
+  
+  if(length(x) < 3){
+    stop("Input must be at least 3")
+  }
+  
+  mean_x = mean(x)
+  sd_x = sd(x)
+
+  list(
+    mean = mean_x,
+    sd = sd_x
+  )
+}
+```
+
+```{r}
+z_scores(x_vec)
+```
+
+Multiple inputs
+
+I'd like to do this with a function!... 
+```{r}
+sim_df = tibble(
+  x = rnorm(100, 4, 3))
+
+sim_df %>% 
+  summarize(
+    mean = mean(x),
+    sd = sd(x))
+```
+
+Here we go:
+
+```{r}
+sim_mean_sd = function(samp_size, mu, sigma){
+  
+  sim_df = tibble(
+  x = rnorm(n = samp_size, mean = mu, sd = sigma))
+
+sim_df %>% 
+  summarize(
+    mean = mean(x),
+    sd = sd(x))
+
+}
+```
+
+```{r}
+sim_mean_sd(100, 6, 3)
+```
+
